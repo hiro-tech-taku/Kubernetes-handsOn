@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sm-api
+  namespace: argocd
+spec:
+  project: default
+
+  # 同期元: GitHub リポジトリ
+  source:
+    repoURL: https://github.com/<your-username>/sm-api-k8s.git
+    targetRevision: main          # 監視するブランチ
+    path: k8s                     # 監視するディレクトリ
+
+  # 同期先: 現在のクラスタの sm-api Namespace
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: sm-api
+
+  # 自動同期の設定
+  syncPolicy:
+    automated:
+      prune: true      # Git から削除されたリソースをクラスタからも削除
+      selfHeal: true   # クラスタが手動変更された場合に Git の状態に戻す
+    syncOptions:
+      - CreateNamespace=true

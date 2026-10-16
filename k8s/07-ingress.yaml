@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: sm-api-ingress
+  namespace: sm-api
+  labels:
+    app: sm-api
+  annotations:
+    # Nginx Ingress Controller を使用
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: sm-api.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: sm-api
+                port:
+                  number: 8080
+          - path: /metrics
+            pathType: Prefix
+            backend:
+              service:
+                name: sm-api
+                port:
+                  number: 8080

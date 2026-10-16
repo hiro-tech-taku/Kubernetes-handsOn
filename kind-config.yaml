@@ -1,0 +1,35 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: sm-api-cluster
+nodes:
+  - role: control-plane
+    # Kubernetes v1.31 は cgroup v1/v2 両対応
+    image: kindest/node:v1.31.4@sha256:2cb39f7295fe7eafee0842b1052a599a4fb0f8bcf3f83d96c7f4864c357c6c30
+    # Kind ネイティブのラベル指定
+    labels:
+      ingress-ready: "true"
+    # Nginx Ingress Controller 用にホストのポート80/443をマッピング
+    extraPortMappings:
+      - containerPort: 80
+        hostPort: 80
+        listenAddress: "127.0.0.1"
+        protocol: TCP
+      - containerPort: 443
+        hostPort: 443
+        listenAddress: "127.0.0.1"
+        protocol: TCP
+      - containerPort: 30080
+        hostPort: 30080
+        protocol: TCP
+  - role: worker
+    image: kindest/node:v1.31.4@sha256:2cb39f7295fe7eafee0842b1052a599a4fb0f8bcf3f83d96c7f4864c357c6c30
+  - role: worker
+    image: kindest/node:v1.31.4@sha256:2cb39f7295fe7eafee0842b1052a599a4fb0f8bcf3f83d96c7f4864c357c6c30
+
+kubeadmConfigPatches:
+  - |
+    kind: ClusterConfiguration
+    etcd:
+      local:
+        extraArgs:
+          max-request-bytes: "33554432"   # 32MB に拡張

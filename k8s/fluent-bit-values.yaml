@@ -1,0 +1,6 @@
+config:
+  outputs: |
+    [OUTPUT]
+        Name stdout
+        Match kube.*
+        Format json_lines

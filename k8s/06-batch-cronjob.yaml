@@ -1,0 +1,54 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: slack-metrics-batch
+  namespace: sm-api
+  labels:
+    app: slack-metrics-batch
+spec:
+  # 毎時0分に実行（UTC）
+  schedule: "0 * * * *"
+  # 前のJobが完了していない場合は新しいJobを起動しない
+  concurrencyPolicy: Forbid
+  # 失敗したJobを3件まで保持
+  failedJobsHistoryLimit: 3
+  # 成功したJobを1件まで保持
+  successfulJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            app: slack-metrics-batch
+        spec:
+          restartPolicy: Never
+          # PostgreSQL が Ready になるまで待つ
+          initContainers:
+            - name: wait-for-postgres
+              image: busybox:1.36
+              command:
+                - sh
+                - -c
+                - |
+                  until nc -z postgres.sm-api.svc.cluster.local 5432; do
+                    echo "PostgreSQL待機中..."
+                    sleep 3
+                  done
+                  echo "PostgreSQL接続確認完了"
+          containers:
+            - name: batch
+              image: sm-api-batch:latest
+              imagePullPolicy: Never        # kind load したローカルイメージ
+              envFrom:
+                - configMapRef:
+                    name: app-config
+                - secretRef:
+                    name: db-secret
+              resources:
+                requests:
+                  cpu: "50m"
+                  memory: "64Mi"
+                limits:
+                  cpu: "200m"
+                  memory: "128Mi"

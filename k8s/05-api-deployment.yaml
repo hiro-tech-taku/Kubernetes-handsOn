@@ -1,0 +1,77 @@
+# -------------------------------------------------------
+# slack-metrics API の Deployment
+# -------------------------------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sm-api
+  namespace: sm-api
+  labels:
+    app: sm-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sm-api
+  # ローリングアップデート設定
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: sm-api
+    spec:
+      containers:
+        - name: sm-api
+          image: sm-api:latest
+          imagePullPolicy: Never          # kind load したローカルイメージ
+          ports:
+            - containerPort: 8080
+          # ConfigMap と Secret を環境変数として注入
+          envFrom:
+            - configMapRef:
+                name: app-config
+            - secretRef:
+                name: db-secret
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "64Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+---
+# -------------------------------------------------------
+# ClusterIP Service
+# Ingress から API Pod へのエンドポイントを提供する
+# -------------------------------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: sm-api
+  namespace: sm-api
+  labels:
+    app: sm-api
+spec:
+  type: ClusterIP
+  selector:
+    app: sm-api
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080

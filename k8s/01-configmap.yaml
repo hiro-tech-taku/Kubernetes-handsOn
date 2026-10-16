@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: sm-api
+data:
+  # DBホストはHeadless ServiceのDNS名
+  DB_HOST: "postgres.sm-api.svc.cluster.local"
+  DB_PORT: "5432"
+  DB_NAME: "appdb"
+  PORT: "8080"
