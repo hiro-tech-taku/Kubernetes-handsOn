@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # slack-metrics API — Kind 環境構築手順書
 
 ## 概要
@@ -550,3 +551,6 @@ PowerShell の実行ポリシーが制限されている場合は以下で一時
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 .\setup.ps1
 ```
+=======
+# Kubernetes-handsOn
+>>>>>>> 9f0877768d1386b417b22fa4f0def8cf1be68e70
