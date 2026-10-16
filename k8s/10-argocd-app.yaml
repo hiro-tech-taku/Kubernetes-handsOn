@@ -8,7 +8,7 @@ spec:
 
   # 同期元: GitHub リポジトリ
   source:
-    repoURL: https://github.com/<your-username>/sm-api-k8s.git
+    repoURL: https://github.com/hiro-tech-taku/Kubernetes-handsOn
     targetRevision: main          # 監視するブランチ
     path: k8s                     # 監視するディレクトリ
 
